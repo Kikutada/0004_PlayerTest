@@ -8,7 +8,7 @@
 
 import SpriteKit
 
-
+/// Main sequence of game scene.
 class CgGameMain : CgSceneFrame {
 
     private var scene_attractMode: CgSceneAttractMode!

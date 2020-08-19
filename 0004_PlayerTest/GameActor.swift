@@ -130,8 +130,8 @@ class CgDirection {
 
 class CgPosition {
 
-    let CG_X_ORIGIN: Int = -4 //8*13+3
-    let CG_Y_ORIGIN: Int = -4 //8*18-3
+    let CG_X_ORIGIN: Int = -4
+    let CG_Y_ORIGIN: Int = -4
 
     let SPEED_UNIT: Int = 16
 
@@ -174,12 +174,12 @@ class CgPosition {
         self.dyf = 0
     }
 
-    func canMove(direction: EnDirection)->Bool {
+    func canMove(to direction: EnDirection)->Bool {
         return ( (direction == .Left || direction == .Right) && (dy == 0) ||
                  (direction ==   .Up || direction ==  .Down) && (dx == 0) )
     }
 
-    func getAbsoluteDelta(direction: EnDirection) -> Int {
+    func getAbsoluteDelta(to direction: EnDirection) -> Int {
         let delta: Int
         switch direction {
             case .Right: delta = dx > 0 ? dx : 0
@@ -191,20 +191,22 @@ class CgPosition {
         return abs(delta)
     }
 
-    func normalize(in direction: EnDirection) {
+    func roundDown(to direction: EnDirection) {
         switch direction {
-            case .Right: dyf = 0
-            case .Left:  dyf = 0
-            case .Up:    dxf = 0
-            case .Down:  dxf = 0
+            case .Right: dxf = 0
+            case .Left:  dxf = 0
+            case .Up:    dyf = 0
+            case .Down:  dyf = 0
             default:     break
         }
     }
 
-    //
-    //  1ドットずつ移動していく処理
-    //
-    func move(direction: EnDirection, speed: Int = 0) -> Int {
+    /// Move every 1dot at a time until speed becomes 0.
+    /// - Parameters:
+    ///   - direction: <#direction description#>
+    ///   - speed: <#speed description#>
+    /// - Returns: <#description#>
+    func move(to direction: EnDirection, speed: Int = 0) -> Int {
 
         var remainingSpeed: Int = 0
         var amountOfMovement: Int
@@ -252,7 +254,7 @@ class CgPosition {
         return remainingSpeed
     }
 
-    func incrementHorizontal(value: Int = 1) {
+    private func incrementHorizontal(value: Int = 1) {
         dx += value
         if dx >= MAZE_UNIT {
             column += 1
@@ -263,7 +265,7 @@ class CgPosition {
         }
     }
 
-    func decrementHorizontal(value: Int = 1) {
+    private func decrementHorizontal(value: Int = 1) {
         dx -= value
         if dx <= -MAZE_UNIT {
             column -= 1
@@ -273,7 +275,8 @@ class CgPosition {
             }
         }
     }
-    func incrementVertical(value: Int = 1) {
+
+    private func incrementVertical(value: Int = 1) {
         dy += value
         if dy >= MAZE_UNIT {
             row += 1
@@ -284,7 +287,7 @@ class CgPosition {
         }
     }
 
-    func decrementVertical(value: Int = 1) {
+    private func decrementVertical(value: Int = 1) {
         dy -= value
         if dy <= -MAZE_UNIT {
             row -= 1
@@ -382,8 +385,8 @@ class CgActor: CbContainer {
 
     func canMove(direction: EnDirection, oneWayProhibition: Bool = true) -> Bool {
         var can = true
-        if position.canMove(direction: direction) {
-            let road = deligateActor.getTileAttributeTo(column: position.column,row: position.row, direction: direction)
+        if position.canMove(to: direction) {
+            let road = deligateActor.getTileAttribute(to: direction, column: position.column,row: position.row)
             
             if (road == .Wall) {
                 can = false

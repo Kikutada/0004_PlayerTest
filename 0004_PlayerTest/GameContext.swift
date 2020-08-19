@@ -25,7 +25,9 @@ class CbContext {
     
     var score_extendPlayer: Int = 200
     var score_extendedPlayer: Bool = false
-
+    
+    /// Update high score
+    /// - Returns: If true, the high score has been updated.
     func updateHighScore()->Bool {
         let highScoreUpdated: Bool = score > highScore
         if highScoreUpdated { highScore = score }

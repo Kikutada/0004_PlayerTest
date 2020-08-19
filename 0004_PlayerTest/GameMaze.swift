@@ -11,7 +11,7 @@ import Foundation
 let MAZE_MAX_DISTANCE: Int  = 36*36+44*44
 let MAZE_UNIT: Int = 8
 
-enum EnMazeValue: Int {
+enum EnMazeTile: Int {
     case Road = 0x00
     case Feed = 0x01
     case PowerFeed = 0x02
@@ -44,10 +44,9 @@ protocol ActorDeligate {
     func getTimeOfPlayerWithPower() -> Int
     func getTimeOfPlayerNotToEat() -> Int
 
-    func setTile(column: Int, row: Int, value: EnMazeValue)
-    func getTile(column: Int, row: Int) -> EnMazeValue
-    func getTileTo(column: Int, row: Int, direction: EnDirection) -> EnMazeValue
-    func getTileAttributeTo(column: Int, row: Int, direction: EnDirection) -> EnMazeValue
+    func setTile(column: Int, row: Int, value: EnMazeTile)
+    func getTile(column: Int, row: Int) -> EnMazeTile
+    func getTileAttribute(to direction: EnDirection, column: Int, row: Int) -> EnMazeTile
 }
 
 
@@ -72,8 +71,9 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
                 drawFrame()
                 let _ = setAndDraw()
                 printPlayers()
-                
-                startBlinkPowerDot()
+                printBlinking1Up()
+
+                drawPowerFeed(state: .Blinking)
 
                 player.reset()
                 player.start()
@@ -81,6 +81,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
                 goToNextSequence()
             
             case  1:
+                // Foever loop
                 break
 
             case  10:
@@ -93,9 +94,9 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
                 } else {
                     let remain = blinkingTimer % 26
                     if remain == 0 {
-                        drawFrame(color: .White)
+                        drawMazeWall(color: .White)
                     } else if remain == 13 { // 13*16ms = 208ms
-                        drawFrame(color: .Blue)
+                        drawMazeWall(color: .Blue)
                     }
                     blinkingTimer -= 1
                 }
@@ -161,11 +162,11 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         return speed
     }
 
-    func setTile(column: Int, row: Int, value: EnMazeValue) {
+    func setTile(column: Int, row: Int, value: EnMazeTile) {
         mazeValues[column][row] = value
     }
 
-    func getTile(column: Int, row: Int) -> EnMazeValue {
+    func getTile(column: Int, row: Int) -> EnMazeTile {
         if column < 0 {
             return mazeValues[BG_WIDTH-1][row]
         } else if column >= BG_WIDTH {
@@ -174,17 +175,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         return mazeValues[column][row]
     }
 
-    func getTileTo(column: Int, row: Int, direction: EnDirection) -> EnMazeValue {
-        switch direction {
-            case .Left : return getTile(column: column-1, row: row)
-            case .Right: return getTile(column: column+1, row: row)
-            case .Up   : return getTile(column: column  , row: row+1)
-            case .Down : return getTile(column: column  , row: row-1)
-            default    : return getTile(column: column  , row: row)
-        }
-    }
-
-    func getTileAttribute(column: Int, row: Int) -> EnMazeValue {
+    func getTileAttribute(column: Int, row: Int) -> EnMazeTile {
         if column < 0 {
             return mazeAttributes[BG_WIDTH-1][row]
         } else if column >= BG_WIDTH {
@@ -193,7 +184,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         return mazeAttributes[column][row]
     }
 
-    func getTileAttributeTo(column: Int, row: Int, direction: EnDirection) -> EnMazeValue {
+    func getTileAttribute(to direction: EnDirection, column: Int, row: Int) -> EnMazeTile {
         switch direction {
             case .Left : return getTileAttribute(column: column-1, row: row)
             case .Right: return getTileAttribute(column: column+1, row: row)
@@ -226,9 +217,9 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
     }
 
     private var numberOfDots: Int = 0
-    private var mazeValues = [[EnMazeValue]](repeating: [EnMazeValue](repeating: .Road, count: BG_HEIGHT), count: BG_WIDTH)
-    private var mazeAttributes = [[EnMazeValue]](repeating: [EnMazeValue](repeating: .Road, count: BG_HEIGHT), count: BG_WIDTH)
-    private var powerDots = [StMazePosition]()
+    private var mazeValues = [[EnMazeTile]](repeating: [EnMazeTile](repeating: .Road, count: BG_HEIGHT), count: BG_WIDTH)
+    private var mazeAttributes = [[EnMazeTile]](repeating: [EnMazeTile](repeating: .Road, count: BG_HEIGHT), count: BG_WIDTH)
+    private var powerFeeds = [StMazePosition]()
     private var blinkingTimer: Int = 0
 
     func setAndDraw() -> Int {
@@ -249,35 +240,35 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         var row = BG_HEIGHT-4
 
         numberOfDots = 0
-        powerDots.removeAll()
+        powerFeeds.removeAll()
 
         for str in mazeSource {
             var column = 0
             for c in str {
                 switch(c) {
                     case "_" :
-                        mazeValues[column][row] = EnMazeValue.Road
-                        mazeAttributes[column][row] = EnMazeValue.Slow
+                        mazeValues[column][row] = EnMazeTile.Road
+                        mazeAttributes[column][row] = EnMazeTile.Slow
                     case " " :
-                        mazeValues[column][row] = EnMazeValue.Road
-                        mazeAttributes[column][row] = EnMazeValue.Road
+                        mazeValues[column][row] = EnMazeTile.Road
+                        mazeAttributes[column][row] = EnMazeTile.Road
                     case "1" :
-                        mazeValues[column][row] = EnMazeValue.Feed
-                        mazeAttributes[column][row] = EnMazeValue.Road
+                        mazeValues[column][row] = EnMazeTile.Feed
+                        mazeAttributes[column][row] = EnMazeTile.Road
                         numberOfDots += 1
                     case "2" :
-                        mazeValues[column][row] = EnMazeValue.Feed
-                        mazeAttributes[column][row] = EnMazeValue.Oneway
+                        mazeValues[column][row] = EnMazeTile.Feed
+                        mazeAttributes[column][row] = EnMazeTile.Oneway
                         numberOfDots += 1
                     case "3" :
-                        mazeValues[column][row] = EnMazeValue.PowerFeed
-                        mazeAttributes[column][row] = EnMazeValue.Road
+                        mazeValues[column][row] = EnMazeTile.PowerFeed
+                        mazeAttributes[column][row] = EnMazeTile.Road
                         numberOfDots += 1
                         let pd = StMazePosition(column: column, row: row)
-                        powerDots.append(pd)
+                        powerFeeds.append(pd)
                     default :
-                        mazeValues[column][row] = EnMazeValue.Wall
-                        mazeAttributes[column][row] = EnMazeValue.Wall
+                        mazeValues[column][row] = EnMazeTile.Wall
+                        mazeAttributes[column][row] = EnMazeTile.Wall
                 }
                 column += 1
             }
@@ -294,7 +285,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         for str in mazeSource {
             var i = 0
             for c in str.utf8 {
-                var txNo: Int
+                let txNo: Int
                 switch c {
                     case 50 : txNo = 592  // Oneway with dot "2" -> "1"
                     case 95 : txNo = 576  // Slow "_" -> " "
@@ -307,13 +298,14 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         }
     }
     
-    enum EnMazeColor: Int {
+    /// Maze color
+    enum EnMazeWallColor: Int {
         case Blue = 0, White = 1
     }
     
     /// Draw only the wall of the maze
     /// - Parameter color: Maze color
-    private func drawFrame(color: EnMazeColor) {
+    private func drawMazeWall(color: EnMazeWallColor) {
         var row = BG_HEIGHT-4
         let offset: Int = color.rawValue*48
 
@@ -322,7 +314,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         for str in mazeSource {
             var i = 0
             for c in str.utf8 {
-                var txNo: Int
+                let txNo: Int
                 if c < 57 || c == 87 {
                     txNo = offset+576
                 } else {
@@ -335,31 +327,27 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
         }
     }
 
-    func startBlinkPowerDot() {
-        for dot in powerDots {
-            if mazeValues[dot.column][dot.row] == EnMazeValue.PowerFeed {
-                background.put(0, column: dot.column, row: dot.row, texture: 768)
+    enum EnPowerFeedState {
+        case Clear, Stop, Blinking
+        
+        func getTexture()->Int {
+            switch self {
+                case .Clear: return 464
+                case .Stop: return 595
+                case .Blinking: return 768
             }
         }
     }
 
-    func stopBlinkPowerDot() {
-        for dot in powerDots {
-            if mazeValues[dot.column][dot.row] == EnMazeValue.PowerFeed {
-                background.put(0, column: dot.column, row: dot.row, texture: 595)
+    func drawPowerFeed(state: EnPowerFeedState) {
+        for t in powerFeeds {
+            if mazeValues[t.column][t.row] == EnMazeTile.PowerFeed {
+                background.put(0, column: t.column, row: t.row, texture: state.getTexture())
             }
         }
     }
 
-    func clearPowerDot() {
-        for dot in powerDots {
-            if mazeValues[dot.column][dot.row] == EnMazeValue.PowerFeed {
-                background.put(0, column: dot.column, row: dot.row, texture: 464)
-            }
-        }
-    }
-
-    func print1up() {
+    func printBlinking1Up() {
         background.put(0, column: 3, row: 35, texture: 769)  // 1 -> 1
         background.put(0, column: 4, row: 35, texture: 770)  // 2 -> U
         background.put(0, column: 5, row: 35, texture: 771)  // 3 -> P
