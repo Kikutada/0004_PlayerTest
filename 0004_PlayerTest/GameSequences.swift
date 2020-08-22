@@ -34,7 +34,7 @@ let BG_HEIGHT: Int = 36
         self.init(binding: object, context: object.context, sprite: object.sprite, background: object.background, sound: object.sound)
     }
 
-    func drawFrame() {
+    func drawBackground() {
         background.draw(0, x: CGFloat(BG_WIDTH/2*8), y: CGFloat(BG_HEIGHT/2*8), columnsInWidth: BG_WIDTH, rowsInHeight: BG_HEIGHT)
     }
 
@@ -126,7 +126,7 @@ class CgSceneAttractMode: CgSceneFrame {
     override func handleSequence(sequence: Int) -> Bool {
         switch sequence {
             case  0:
-                drawFrame()
+                drawBackground()
                 clear()
                 printFrame()
                 printPlayerScore()

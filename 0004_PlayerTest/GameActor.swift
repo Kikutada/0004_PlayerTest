@@ -9,10 +9,7 @@
 import Foundation
 import UIKit
 
-//
-//  EnDirection列挙型
-//      キャラクターが動く方向を列挙
-//
+/// List the directions in which the character moves
 enum EnDirection: Int {
     case None = -2
     case Stop   = -1
@@ -88,6 +85,7 @@ enum EnDirection: Int {
 }
 
 
+/// Position class of the moving character
 class CgDirection {
     var currentDirection: EnDirection = .None
     var nextDirection: EnDirection = .None
@@ -125,9 +123,7 @@ class CgDirection {
     }
 }
 
-
-
-
+/// Position class of the moving character
 class CgPosition {
 
     let CG_X_ORIGIN: Int = -4
@@ -201,11 +197,11 @@ class CgPosition {
         }
     }
 
-    /// Move every 1dot at a time until speed becomes 0.
+    /// Move every 1dot at a time in the direction.
     /// - Parameters:
-    ///   - direction: <#direction description#>
-    ///   - speed: <#speed description#>
-    /// - Returns: <#description#>
+    ///   - direction: Move in the direction
+    ///   - speed: Speed amount
+    /// - Returns: Remaining speed amount
     func move(to direction: EnDirection, speed: Int = 0) -> Int {
 
         var remainingSpeed: Int = 0
@@ -300,8 +296,7 @@ class CgPosition {
 
 }
 
-//------------------------------------------------------------
-
+/// Base class for characters moving in the maze.
 class CgActor: CbContainer {
 
     enum EnActor: Int {
@@ -348,55 +343,38 @@ class CgActor: CbContainer {
     var sprite_number: Int = 0
     
     let speedUnit: Int = 16
-    private var speedTotal: Int = 0
-    private var speed: Int = 0
-    
+
     init(object: CgSceneFrame, deligateActor: ActorDeligate) {
         super.init(binding: object)
         self.sprite = object.sprite
         self.deligateActor = deligateActor
+        enabled = false
     }
 
+    // ============================================================
+    //   Core operation methods for actor
+    //  - Sequence: reset()->start()->update() called->stop()
+    // ============================================================
+    
+    /// Reset
+    ///  Event messages are not sent.
     func reset() {
         enabled = false
-        speedTotal = 0
+        position.set(column: 0, row: 0)
+        direction.reset()
         sprite.setDepth(sprite_number, zPosition: actor.getDepth())
     }
     
+    /// Start
+    ///  Event messages are sent.
     func start() {
         enabled = true
     }
-
+    
+    /// Stop
+    ///  Event messages are not sent.
     func stop() {
         enabled = false
-    }
-
-    func setSpeed(speed: Int) {
-        self.speed = speed
-    }
-
-    func calculateSpeed() -> Int {
-        speedTotal += speed
-        let result = speedTotal / speedUnit
-        speedTotal = speedTotal % speedUnit
-        return result
-    }
-
-
-    func canMove(direction: EnDirection, oneWayProhibition: Bool = true) -> Bool {
-        var can = true
-        if position.canMove(to: direction) {
-            let road = deligateActor.getTileAttribute(to: direction, column: position.column,row: position.row)
-            
-            if (road == .Wall) {
-                can = false
-            } else if oneWayProhibition && (road == .Oneway && direction == .Up) {
-                can = false
-            }
-        } else {
-            can = false
-        }
-        return can
     }
 
 }

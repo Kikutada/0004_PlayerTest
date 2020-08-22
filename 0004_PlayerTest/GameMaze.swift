@@ -11,6 +11,7 @@ import Foundation
 let MAZE_MAX_DISTANCE: Int  = 36*36+44*44
 let MAZE_UNIT: Int = 8
 
+/// Kind of tile int the maze
 enum EnMazeTile: Int {
     case Road = 0x00
     case Feed = 0x01
@@ -23,19 +24,33 @@ enum EnMazeTile: Int {
     
     init?( _ value : Int) {
         switch value {
-        case 0x00: self = .Road
-        case 0x01: self = .Feed
-        case 0x02: self = .PowerFeed
-        case 0x03: self = .Fruit
-        case 0xFC: self = .Slow
-        case 0xFD: self = .Oneway
-        case 0xFE: self = .Gate
-        case 0xFF: self = .Wall
-        default:   return nil
+            case 0x00: self = .Road
+            case 0x01: self = .Feed
+            case 0x02: self = .PowerFeed
+            case 0x03: self = .Fruit
+            case 0xFC: self = .Slow
+            case 0xFD: self = .Oneway
+            case 0xFE: self = .Gate
+            case 0xFF: self = .Wall
+            default:   return nil
+        }
+    }
+
+    func getTexture() -> Int {
+        switch self {
+            case .Road: return 464
+            case .Feed: return 593
+            case .PowerFeed: return 595
+            case .Fruit: return 0
+            case .Slow: return 464
+            case .Oneway: return 464
+            case .Gate: return 0
+            case .Wall: return 0
         }
     }
 }
 
+/// Protocol  for actors
 protocol ActorDeligate {
 
     func playerEatFeed(column: Int, row: Int, power: Bool)
@@ -48,7 +63,6 @@ protocol ActorDeligate {
     func getTile(column: Int, row: Int) -> EnMazeTile
     func getTileAttribute(to direction: EnDirection, column: Int, row: Int) -> EnMazeTile
 }
-
 
 /// Maze scene class for play mode
 /// This class has some methods to draw a maze and starting messages.
@@ -68,7 +82,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
     override func handleSequence(sequence: Int) -> Bool {
         switch sequence {
             case  0:
-                drawFrame()
+                drawBackground()
                 let _ = setAndDraw()
                 printPlayers()
                 printBlinking1Up()
@@ -84,6 +98,9 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
                 // Foever loop
                 break
 
+            //
+            //  Round clear animation(Maze flashes)
+            //
             case  10:
                 blinkingTimer = 104  // 104*16ms = 1664ms
                 goToNextSequence()
@@ -122,7 +139,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
     }
 
     func playerEatFeed(column: Int, row: Int, power: Bool) {
-        background.put(0, column: column, row: row, texture: 16*29)
+        background.put(0, column: column, row: row, texture: EnMazeTile.Road.getTexture())
         setTile(column: column,row: row, value: .Road)
 
         if power {
@@ -142,7 +159,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
     }
     
     func playerEatFruit(column: Int, row: Int) {
-        background.put(0, column: column, row: row, texture: 16*29)
+        background.put(0, column: column, row: row, texture: EnMazeTile.Road.getTexture())
         setTile(column: column,row: row, value: .Road)
     }
     

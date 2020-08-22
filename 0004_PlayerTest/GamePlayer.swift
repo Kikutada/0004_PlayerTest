@@ -9,20 +9,15 @@
 import Foundation
 import UIKit
 
-// init
-// reset
-// start
-// stop
-// update
-
+/// Player(Pacman) class derived from CgAcotr
 class CgPlayer : CgActor {
 
     enum EnPlayerAction: Int {
-        case Stopping, Walking, EatingDot, EatingPower, EatingFruit
+        case None, Stopping, Walking, Turning, EatingDot, EatingPower, EatingFruit
     }
 
     var targetDirecition: EnDirection = .Stop
-    var turning: Bool = false
+    var actionState: EnPlayerAction = .None
 
     var timer_playerWithPower: CbTimer!
     var timer_playerNotToEat: CbTimer!
@@ -36,6 +31,15 @@ class CgPlayer : CgActor {
         enabled = false
     }
 
+    // ============================================================
+    //  Event Handler
+    // ============================================================
+
+    /// Event handler
+    /// - Parameters:
+    ///   - sender: Message sender
+    ///   - id: Message ID
+    ///   - values: Parameters of message
     override func handleEvent(sender: CbObject, message: EnMessage, parameter values: [Int]) {
         switch message {
             case .Swipe:
@@ -47,6 +51,12 @@ class CgPlayer : CgActor {
         }
     }
 
+    // ============================================================
+    //   Core operation methods for actor
+    //  - Sequence: reset()->start()->update() called->stop()
+    // ============================================================
+
+    /// Reset player states and draw at default position
     override func reset() {
         super.reset()
         timer_playerWithPower.reset()
@@ -54,28 +64,31 @@ class CgPlayer : CgActor {
         timer_playerWithPower.set(interval: deligateActor.getTimeOfPlayerWithPower())
         timer_playerNotToEat.set(interval: deligateActor.getTimeOfPlayerNotToEat())
 
-        direction.reset()
         targetDirecition = .Stop
-        turning = false
+        actionState = .None
 
         position.set(column: 13, row: 9, dx: 4)
         direction.set(to: .Stop)
         draw(to: .None)
     }
 
+    /// Start
     override func start() {
         super.start()
         timer_playerNotToEat.start()
     }
 
+    /// Stop
     override func stop() {
         super.stop()
         direction.set(to: .Stop)
         draw(to: .Stop)
     }
     
+    /// Update handler
+    /// - Parameter interval: Interval time(ms) to update
     override func update(interval: Int) {
-        if turning {
+        if actionState == .Turning {
             turn()
         } else {
             if canMove(to: targetDirecition) {
@@ -83,7 +96,7 @@ class CgPlayer : CgActor {
             } else {
                 direction.update()
                 if canTurn() {
-                    turning = true
+                    actionState = .Turning
                     direction.set(to: targetDirecition)
                     return
                 }
@@ -91,6 +104,10 @@ class CgPlayer : CgActor {
             move()
         }
     }
+
+    // ============================================================
+    //  General methods in this class
+    // ============================================================
 
     ///
     /// Can player turn the corner?
@@ -127,7 +144,7 @@ class CgPlayer : CgActor {
                 speedForCurrentDirection = position.move(to: direction.get(), speed: speedForCurrentDirection)
                 speedForNextDirection = position.move(to: direction.getNext(), speed: speedForNextDirection)
             } else {
-                turning = false
+                actionState = .None
                 position.roundDown(to: direction.get())
                 direction.update()
                 break
@@ -139,15 +156,15 @@ class CgPlayer : CgActor {
     }
     
     /// Can player move through the tile?
-    /// - Parameter tile: <#value description#>
-    /// - Returns: <#description#>
+    /// - Parameter tile: Tile
+    /// - Returns: True if player can move
     func canMove(through tile: EnMazeTile) -> Bool {
         return tile != .Wall
     }
     
     /// Can player move in the direction?
-    /// - Parameter nextDirection: <#nextDirection description#>
-    /// - Returns: <#description#>
+    /// - Parameter nextDirection: Direction
+    /// - Returns: True if player can move
     func canMove(to nextDirection: EnDirection) -> Bool {
         if position.canMove(to: nextDirection) {
             let targetColumn = position.column + nextDirection.getHorizaontalDelta()
@@ -157,8 +174,8 @@ class CgPlayer : CgActor {
         }
         return false
     }
-    ///
 
+    ///
     ///  Move and eat feed or fruit or nothing
     ///
     func move() {
@@ -167,9 +184,9 @@ class CgPlayer : CgActor {
         let deltaDistance: Int = position.getAbsoluteDelta(to: direction.getNext())
         let targetColumn = position.column + direction.getNext().getHorizaontalDelta()
         let targetRow = position.row + direction.getNext().getVerticalDelta()
-        let value: EnMazeTile = (deltaDistance < 4) ? .Road : deligateActor.getTile(column: targetColumn, row: targetRow)
+        let tile: EnMazeTile = (deltaDistance < 4) ? .Road : deligateActor.getTile(column: targetColumn, row: targetRow)
 
-        switch value {
+        switch tile {
             case .Feed:
                 speed = deligateActor.getPlayerSpeed(action: .EatingDot, with: power)
                 deligateActor.playerEatFeed(column: targetColumn, row: targetRow, power: false)
@@ -213,7 +230,9 @@ class CgPlayer : CgActor {
             draw(to: direction.get())
         }
     }
-
+    
+    /// Draw and animate  player in the direction
+    /// - Parameter direction: Direction
     func draw(to direction: EnDirection) {
         switch direction {
             case .Right : sprite.startAnimation(sprite_number, sequence: [0,1,2]  , timePerFrame: 0.05, repeat: true)
@@ -224,11 +243,13 @@ class CgPlayer : CgActor {
             case .None  : sprite.draw(sprite_number, x: position.x, y: position.y, texture: 2)
         }
     }
-
-    func drawCharacterDisappeared() {
+    
+    /// Draw player disappeared animation (Player Miss)
+    func drawPlayerDisappeared() {
         sprite.startAnimation(sprite_number, sequence: [3,4,5,6,7,8,9,10,11,12,13,13,14], timePerFrame: 0.13, repeat: false)
     }
-
+    
+    /// Clear player
     func clear() {
         sprite.stopAnimation(sprite_number)
         sprite.clear(sprite_number)
