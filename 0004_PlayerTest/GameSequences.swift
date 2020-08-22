@@ -16,13 +16,13 @@ let BG_HEIGHT: Int = 36
 /// This class has spritekit managers, game context and  some methods of printing messages.
  class CgSceneFrame: CbScene {
 
-    var context: CbContext!
+    var context: CgContext!
 
     var sprite: CgSpriteManager!
     var background: CgCustomBackgroundManager!
     var sound: CgSoundManager!
 
-    convenience init(binding object: CbObject, context: CbContext, sprite: CgSpriteManager, background: CgCustomBackgroundManager, sound: CgSoundManager) {
+    convenience init(binding object: CbObject, context: CgContext, sprite: CgSpriteManager, background: CgCustomBackgroundManager, sound: CgSoundManager) {
         self.init(binding: object)
         self.context = context
         self.sprite = sprite

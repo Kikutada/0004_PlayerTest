@@ -24,7 +24,7 @@ class CgGameMain : CgSceneFrame {
         self.sprite = CgSpriteManager(view: skscene, imageNamed: "pacman16_16.png", width: 16, height: 16, maxNumber: 64)
         self.background = CgCustomBackgroundManager(view: skscene, imageNamed: "pacman8_8.png", width: 8, height: 8, maxNumber: 2)
         self.sound = CgSoundManager(binding: self, view: skscene)
-        self.context = CbContext()
+        self.context = CgContext()
 
         scene_attractMode = CgSceneAttractMode(object: self)
         scene_maze = CgSceneMaze(object: self)

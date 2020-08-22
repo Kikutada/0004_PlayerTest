@@ -9,7 +9,7 @@
 import Foundation
 
 /// Context and settings for game
-class CbContext {
+class CgContext {
 
     enum EnLanguage: Int {
         case English = 0, Japanese
