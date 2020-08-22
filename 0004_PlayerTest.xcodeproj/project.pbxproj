@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D804CD5324F15621002EF0A2 /* screen1.png in Resources */ = {isa = PBXBuildFile; fileRef = D804CD5224F15621002EF0A2 /* screen1.png */; };
 		D822F1A224E8C33A0025BE95 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D822F1A124E8C33A0025BE95 /* AppDelegate.swift */; };
 		D822F1A624E8C33A0025BE95 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = D822F1A524E8C33A0025BE95 /* Actions.sks */; };
 		D822F1A824E8C33A0025BE95 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = D822F1A724E8C33A0025BE95 /* GameScene.swift */; };
@@ -41,6 +42,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D804CD5224F15621002EF0A2 /* screen1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screen1.png; sourceTree = "<group>"; };
 		D822F19E24E8C33A0025BE95 /* 0004_PlayerTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 0004_PlayerTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D822F1A124E8C33A0025BE95 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D822F1A524E8C33A0025BE95 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
@@ -87,9 +89,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D804CD5124F15609002EF0A2 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				D804CD5224F15621002EF0A2 /* screen1.png */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
 		D822F19524E8C33A0025BE95 = {
 			isa = PBXGroup;
 			children = (
+				D804CD5124F15609002EF0A2 /* images */,
 				D822F1A024E8C33A0025BE95 /* 0004_PlayerTest */,
 				D822F19F24E8C33A0025BE95 /* Products */,
 			);
@@ -211,6 +222,7 @@
 				D822F1AD24E8C33A0025BE95 /* Main.storyboard in Resources */,
 				D822F1DA24E8C41E0025BE95 /* 16_BGM_power_400ms.wav in Resources */,
 				D822F1DE24E8C41E0025BE95 /* 16_BGM_normal_400ms.wav in Resources */,
+				D804CD5324F15621002EF0A2 /* screen1.png in Resources */,
 				D822F1DC24E8C41E0025BE95 /* 16_pacman_extrapac_1952ms.wav in Resources */,
 				D822F1DF24E8C41E0025BE95 /* 16_credit_224ms.wav in Resources */,
 				D822F1AF24E8C33D0025BE95 /* Assets.xcassets in Resources */,
