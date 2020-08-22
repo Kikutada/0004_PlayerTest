@@ -344,7 +344,7 @@ class CgActor: CbContainer {
     
     let speedUnit: Int = 16
 
-    init(object: CgSceneFrame, deligateActor: ActorDeligate) {
+    init(binding object: CgSceneFrame, deligateActor: ActorDeligate) {
         super.init(binding: object)
         self.sprite = object.sprite
         self.deligateActor = deligateActor

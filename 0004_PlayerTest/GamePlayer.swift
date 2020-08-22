@@ -22,8 +22,8 @@ class CgPlayer : CgActor {
     var timer_playerWithPower: CbTimer!
     var timer_playerNotToEat: CbTimer!
  
-    override init(object: CgSceneFrame, deligateActor: ActorDeligate) {
-        super.init(object: object, deligateActor: deligateActor)
+    override init(binding object: CgSceneFrame, deligateActor: ActorDeligate) {
+        super.init(binding: object, deligateActor: deligateActor)
         timer_playerWithPower = CbTimer(binding: self)
         timer_playerNotToEat = CbTimer(binding: self)
         actor = .Pacman

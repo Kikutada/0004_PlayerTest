@@ -72,7 +72,7 @@ class CgSceneMaze: CgSceneFrame, ActorDeligate {
 
     convenience init(object: CgSceneFrame) {
         self.init(binding: object, context: object.context, sprite: object.sprite, background: object.background, sound: object.sound)
-        player = CgPlayer(object: self, deligateActor: self)
+        player = CgPlayer(binding: self, deligateActor: self)
     }
 
     /// Handle sequence
